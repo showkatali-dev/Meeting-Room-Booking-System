@@ -6,6 +6,9 @@ import httpStatus from 'http-status';
 import { sign } from 'jsonwebtoken';
 
 export const createUserIntoDB = async (payload: IUser) => {
+  // check if user exists
+  const existingUser = await User.isUserExistsByEmail(payload.email);
+
   const user = await User.create(payload);
   const { _id, name, email, phone, role, address } = user;
   return { _id, name, email, phone, role, address };
