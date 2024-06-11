@@ -5,5 +5,5 @@ export interface IBooking {
   slots: mongoose.Types.ObjectId[];
   user: mongoose.Types.ObjectId;
   totalAmount: number;
-  isConfirmed: 'confirmed' | 'unconfirmed' | 'cancelled';
+  isConfirmed?: 'confirmed' | 'unconfirmed' | 'cancelled';
 }
