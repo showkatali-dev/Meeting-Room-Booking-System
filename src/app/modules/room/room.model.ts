@@ -33,4 +33,19 @@ const roomSchema = new Schema<IRoom>({
   },
 });
 
+roomSchema.pre('find', function (next) {
+  this.where({ isDeleted: { $ne: true } });
+  next();
+});
+
+roomSchema.pre('findOne', function (next) {
+  this.where({ isDeleted: { $ne: true } });
+  next();
+});
+
+roomSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+
 export const Room = model<IRoom>('Room', roomSchema);

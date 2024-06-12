@@ -6,12 +6,8 @@ import httpStatus from 'http-status';
 import { sign } from 'jsonwebtoken';
 
 export const createUserIntoDB = async (payload: IUser) => {
-  // check if user exists
-  const existingUser = await User.isUserExistsByEmail(payload.email);
-
   const user = await User.create(payload);
-  const { _id, name, email, phone, role, address } = user;
-  return { _id, name, email, phone, role, address };
+  return user;
 };
 
 export const loginUserService = async (payload: IUserLogin) => {
@@ -39,15 +35,12 @@ export const loginUserService = async (payload: IUserLogin) => {
     expiresIn: jwt_expire_in as string,
   });
 
+  // to remove password from response
+  const { password, ...userWithoutPassword } = user;
+  user.password = password;
+
   const result = {
-    data: {
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      role: user.role,
-      address: user.address,
-    },
+    data: userWithoutPassword,
     token,
   };
 

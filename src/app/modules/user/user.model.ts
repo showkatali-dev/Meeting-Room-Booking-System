@@ -32,21 +32,26 @@ const userSchema = new Schema<IUser, IUserModel>({
   },
 });
 
+// to encrypt password before saving
 userSchema.pre('save', async function (next) {
   this.password = await bcrypt.hash(this.password, Number(bcrypt_salt_rounds));
   next();
 });
 
-userSchema.post('save', async function (doc, next) {
-  doc.password = '';
-  next();
-});
-
-userSchema.statics.isUserExistsByEmail = async function (email) {
-  const user = await User.findOne({ email }).select('+password');
+// to remove password from response after user created
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
   return user;
 };
 
+// static method to get user by email
+userSchema.statics.isUserExistsByEmail = async function (email) {
+  const user = await User.findOne({ email }).select('+password');
+  return user?.toObject();
+};
+
+// static method to check password match
 userSchema.statics.isPasswordMatched = async function (
   plainTextPassword,
   hashedPassword,
