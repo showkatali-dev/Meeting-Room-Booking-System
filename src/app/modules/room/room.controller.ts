@@ -8,6 +8,7 @@ import {
   softDeleteRoomByIdFromDB,
   updateRoomByIdIntoDB,
 } from './room.service';
+import AppError from '../../error/app-error';
 
 export const createRoom = catchAsync(async (req, res) => {
   const result = await createRoomIntoDB(req.body);
@@ -23,12 +24,7 @@ export const getAllRooms = catchAsync(async (req, res) => {
   const result = await getAllRoomsFromDB();
 
   if (!result.length) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'No Data Found',
-      data: [],
-    });
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
   }
 
   sendResponse(res, {
@@ -42,12 +38,7 @@ export const getAllRooms = catchAsync(async (req, res) => {
 export const getRoomById = catchAsync(async (req, res) => {
   const result = await getRoomByIdFromDB(req.params.id);
   if (!result) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'No Data Found',
-      data: null,
-    });
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
   }
 
   sendResponse(res, {
@@ -62,12 +53,7 @@ export const updateRoomById = catchAsync(async (req, res) => {
   const result = await updateRoomByIdIntoDB(req.params.id, req.body);
 
   if (!result) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'No Data Found',
-      data: null,
-    });
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
   }
 
   sendResponse(res, {
@@ -82,12 +68,7 @@ export const softDeleteRoomById = catchAsync(async (req, res) => {
   const result = await softDeleteRoomByIdFromDB(req.params.id);
 
   if (!result) {
-    return sendResponse(res, {
-      statusCode: httpStatus.NOT_FOUND,
-      success: false,
-      message: 'No Data Found',
-      data: null,
-    });
+    throw new AppError(httpStatus.NOT_FOUND, 'No Data Found');
   }
 
   sendResponse(res, {

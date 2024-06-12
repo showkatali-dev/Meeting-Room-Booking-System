@@ -1,7 +1,7 @@
-import { ISlot } from './slot.interface';
+import { ISlot, ISlotModel } from './slot.interface';
 import { Schema, model } from 'mongoose';
 
-const slotSchema = new Schema<ISlot>({
+const slotSchema = new Schema<ISlot, ISlotModel>({
   room: {
     type: Schema.Types.ObjectId,
     ref: 'Room',
@@ -25,4 +25,19 @@ const slotSchema = new Schema<ISlot>({
   },
 });
 
-export const Slot = model<ISlot>('Slot', slotSchema);
+slotSchema.pre('find', function (next) {
+  this.where({ isBooked: { $ne: true } });
+  next();
+});
+
+slotSchema.statics.isSlotExists = async function (
+  room,
+  date,
+  startTime,
+  endTime,
+) {
+  const slot = await this.findOne({ room, date, startTime, endTime });
+  return !!slot;
+};
+
+export const Slot = model<ISlot, ISlotModel>('Slot', slotSchema);
