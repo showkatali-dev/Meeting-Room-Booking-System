@@ -32,4 +32,9 @@ const bookingSchema = new Schema<IBooking>({
   },
 });
 
+bookingSchema.pre('find', function (next) {
+  this.where({ isConfirmed: { $ne: 'cancelled' } });
+  next();
+});
+
 export const Booking = model<IBooking>('Booking', bookingSchema);

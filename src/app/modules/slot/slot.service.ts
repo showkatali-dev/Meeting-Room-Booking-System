@@ -41,7 +41,10 @@ export const createSlotIntoDB = async (payload: ISlot) => {
       );
 
       if (isAlreadyExists) {
-        throw new AppError(httpStatus.BAD_REQUEST, 'Slot already exists');
+        throw new AppError(
+          httpStatus.BAD_REQUEST,
+          `${slot_data.date} ${slot_data.startTime}:${slot_data.endTime} slot already exists for this room`,
+        );
       }
 
       const slot = await Slot.create([slot_data], { session });
@@ -67,6 +70,11 @@ export const createSlotIntoDB = async (payload: ISlot) => {
 export const getAvailableSlotsFromDB = async (
   query: Record<string, unknown>,
 ) => {
-  const result = await Slot.find(query);
+  if (query.roomId) {
+    query.room = query.roomId;
+    delete query.roomId;
+  }
+
+  const result = await Slot.find(query).populate('room');
   return result;
 };
