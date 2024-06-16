@@ -21,6 +21,10 @@ const bookingSchema = new Schema<IBooking>({
     ref: 'User',
     required: true,
   },
+  date: {
+    type: String,
+    required: true,
+  },
   totalAmount: {
     type: Number,
     required: true,
@@ -30,10 +34,14 @@ const bookingSchema = new Schema<IBooking>({
     enum: ['confirmed', 'unconfirmed', 'cancelled'],
     default: 'unconfirmed',
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 bookingSchema.pre('find', function (next) {
-  this.where({ isConfirmed: { $ne: 'cancelled' } });
+  this.where({ idDeleted: { $ne: true } });
   next();
 });
 

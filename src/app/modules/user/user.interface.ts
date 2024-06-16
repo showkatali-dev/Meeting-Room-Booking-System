@@ -1,5 +1,8 @@
 /* eslint-disable no-unused-vars */
 import mongoose, { Model } from 'mongoose';
+import { USER_ROLE } from './user.constant';
+
+export type IUserRole = keyof typeof USER_ROLE;
 
 export interface IUser {
   name: string;

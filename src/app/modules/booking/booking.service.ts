@@ -4,16 +4,39 @@ import { Slot } from '../slot/slot.model';
 import { IBooking } from './booking.interface';
 import { Booking } from './booking.model';
 import mongoose from 'mongoose';
+import { User } from '../user/user.model';
+import { Room } from '../room/room.model';
 
 export const createBookingIntoDB = async (payload: IBooking) => {
-  const availableSlots = await Slot.find({ room: payload.room }).lean();
+  const room = await Room.findById(payload.room).lean();
 
-  if (!availableSlots.length) {
+  if (!room) {
     throw new AppError(httpStatus.NOT_FOUND, 'Room not found');
   }
 
+  // check available slots
+  const availableSlots = await Slot.find({
+    room: payload.room,
+    date: payload.date,
+  }).lean();
+
+  if (!availableSlots.length) {
+    throw new AppError(httpStatus.NOT_FOUND, 'No Slot found');
+  }
+
+  // check if user not exist
+  const user = await User.findById(payload.user).lean();
+
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'User not found');
+  }
+
+  // check if any slot not available
   payload.slots.forEach((slot) => {
-    if (!availableSlots.some((s) => s._id.toString() === slot.toString())) {
+    const availableSlot = availableSlots.find(
+      (s) => s._id.toString() === slot.toString(),
+    );
+    if (!availableSlot) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
         `Slot ${slot} is not available`,
@@ -21,14 +44,16 @@ export const createBookingIntoDB = async (payload: IBooking) => {
     }
   });
 
+  payload.totalAmount = room.pricePerSlot * payload.slots.length;
+
   const session = await mongoose.startSession();
 
   try {
     session.startTransaction();
 
-    const result = await Booking.create([payload], { session });
+    const newBooking = await Booking.create([payload], { session });
 
-    if (!result.length) {
+    if (!newBooking.length) {
       throw new AppError(
         httpStatus.BAD_REQUEST,
         'Failed to create booking. Please try again',
@@ -56,24 +81,23 @@ export const createBookingIntoDB = async (payload: IBooking) => {
       );
     }
 
+    const result = await Booking.populate(newBooking, {
+      path: 'room slots user',
+    });
+
     await session.commitTransaction();
-    await session.endSession();
 
     return result;
   } catch (error) {
     await session.abortTransaction();
-    await session.endSession();
     throw error;
+  } finally {
+    await session.endSession();
   }
 };
 
 export const gelAllBookingsFromDB = async () => {
-  const result = await Booking.find();
-  return result;
-};
-
-export const getUserBookingsFromDB = async (userId: string) => {
-  const result = await Booking.find({ user: userId });
+  const result = await Booking.find().populate('room slots user');
   return result;
 };
 

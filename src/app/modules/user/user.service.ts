@@ -27,7 +27,7 @@ export const loginUserService = async (payload: IUserLogin) => {
   }
 
   const jwtPayload = {
-    email: user.email,
+    userId: user._id,
     role: user.role,
   };
 
