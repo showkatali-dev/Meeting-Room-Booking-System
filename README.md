@@ -4,6 +4,10 @@ This project implements a web application for managing room reservations in a co
 
 The backend of the application is built using TypeScript with Express.js as the web framework and Mongoose for MongoDB object modeling. This README provides an overview of the project structure, installation instructions, and basic usage.
 
+## Demo
+
+You can access a live demo of Meeting Room Booking System at -> https://meeting-room-booking-system-sam.vercel.app
+
 ## Features
 
 - #### Admin Panel:
